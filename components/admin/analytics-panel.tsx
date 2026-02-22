@@ -127,13 +127,14 @@ export function AnalyticsPanel() {
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
               <XAxis dataKey="name" stroke="#64748b" />
               <YAxis stroke="#64748b" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#1e293b',
-                  border: '1px solid #475569',
-                  borderRadius: '0.5rem',
-                }}
-              />
+<Tooltip
+  cursor={{ fill: 'transparent' }} // This removes the gray box
+  contentStyle={{
+    backgroundColor: '#000000',
+    border: '1px solid #475569',
+    borderRadius: '0.5rem',
+  }}
+/>
               <Bar dataKey="value" fill="#3b82f6" radius={[8, 8, 0, 0]}>
                 {severityData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
