@@ -2,29 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { AlertTriangle, MapPin } from 'lucide-react'
-
-interface Issue {
-  id: string
-  lat: number
-  lng: number
-  severity: 'high' | 'medium' | 'low'
-  type: 'Pothole' | 'Bridge Crack' | 'Water Logging' | 'Tree on Road'
-  address: string
-}
-
-const CUTTACK_ISSUES: Issue[] = [
-  { id: 'CTC-006', lat: 20.4285, lng: 85.8340, severity: 'high', type: 'Pothole', address: 'Trisulia Bridge Entry Point' },
-  { id: 'CTC-007', lat: 20.4150, lng: 85.8210, severity: 'medium', type: 'Street Light Out', address: 'Sri Sri University Main Gate Road' },
-  { id: 'CTC-008', lat: 20.4020, lng: 85.8550, severity: 'high', type: 'Water Logging', address: 'Metro Satellite City Entrance' },
-  { id: 'CTC-009', lat: 20.4410, lng: 85.8620, severity: 'low', type: 'Garbage Dump', address: 'Netaji Subhash Chandra Bose Setu' },
-  { id: 'CTC-010', lat: 20.4855, lng: 85.9230, severity: 'high', type: 'Road Crack', address: 'Jagatpur Industrial Estate Lane 2' },
-  { id: 'CTC-011', lat: 20.4610, lng: 85.8720, severity: 'medium', type: 'Broken Divider', address: 'Ranihat Canal Road' },
-  { id: 'CTC-012', lat: 20.4520, lng: 85.8980, severity: 'low', type: 'Stray Animal Zone', address: 'Khannagar Park Road' },
-  { id: 'CTC-013', lat: 20.4780, lng: 85.8450, severity: 'high', type: 'Pothole', address: 'Bidanasi Housing Board Road' },
-  { id: 'CTC-014', lat: 20.4680, lng: 85.8820, severity: 'medium', type: 'Manhole Open', address: 'Chandi Chowk Junction' },
-  { id: 'CTC-015', lat: 20.4350, lng: 85.8280, severity: 'high', type: 'Dust Pollution', address: 'Naraj Road near Godi Sahi' }]
+import { useIssues } from '@/hooks/use-issues'
+import type { Issue } from '@/lib/issues'
 
 export function MapView() {
+  const { issues } = useIssues()
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null)
   const [isMounted, setIsMounted] = useState(false)
   const mapRef = useRef<any>(null)
@@ -56,7 +38,7 @@ export function MapView() {
         attribution: '&copy; OpenStreetMap &copy; CARTO',
       }).addTo(map)
 
-      CUTTACK_ISSUES.forEach((issue) => {
+      issues.forEach((issue) => {
         const color =
           issue.severity === 'high' ? '#f43f5e' :
           issue.severity === 'medium' ? '#f59e0b' : '#10b981'
@@ -100,7 +82,7 @@ export function MapView() {
         mapRef.current = null
       }
     }
-  }, [isMounted])
+  }, [isMounted, issues])
 
   return (
     <div className="w-full space-y-4 bg-card p-4 rounded-2xl border border-border">
@@ -110,7 +92,7 @@ export function MapView() {
           Cuttack Live Incident Map
         </h2>
         <span className="text-xs text-muted-foreground bg-muted px-3 py-1 rounded-full border border-border">
-          Showing {CUTTACK_ISSUES.length} reports
+          Showing {issues.length} reports
         </span>
       </div>
 

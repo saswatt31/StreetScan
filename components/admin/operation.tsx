@@ -1,37 +1,111 @@
 'use client'
 
-import { useState } from 'react'
-import { 
-  AlertTriangle, 
-  Droplets, 
-  Trees, 
-  Construction, 
-  MapPin, 
+import { useState, useEffect } from 'react'
+import {
+  AlertTriangle,
+  Droplets,
+  Trees,
+  Construction,
+  MapPin,
   ChevronDown,
   Activity
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { getStoredReports, type CitizenReport } from '@/lib/issues'
 
 interface Report {
   id: string
-  type: 'Pothole' | 'Bridge Crack' | 'Water Logging' | 'Tree on Road'
+  type: string
   severity: 'High' | 'Medium' | 'Low'
   location: string
   reportedAt: string
   assignedTeam: string
 }
 
-const INITIAL_REPORTS: Report[] = [
-  { id: 'REP-001', type: 'Bridge Crack', severity: 'High', location: 'Brooklyn Bridge North', reportedAt: '10 mins ago', assignedTeam: 'None' },
-  { id: 'REP-002', type: 'Water Logging', severity: 'Medium', location: 'Canal St Station', reportedAt: '25 mins ago', assignedTeam: 'None' },
-  { id: 'REP-003', type: 'Pothole', severity: 'High', location: 'Broadway & Wall St', reportedAt: '1 hour ago', assignedTeam: 'Alpha Squad' },
-  { id: 'REP-004', type: 'Tree on Road', severity: 'Low', location: 'West Side Hwy Exit 4', reportedAt: '2 hours ago', assignedTeam: 'None' },
-]
-
 const teams = ['None', 'Alpha Squad', 'Rapid Response', 'Engineering B', 'Drainage Specialists']
 
+// Base dummy data for operations
+const BASE_OPERATIONS_REPORTS: Report[] = [
+  { id: 'REP-001', type: 'Bridge Crack', severity: 'High', location: 'Mahanadi Bridge North Entry', reportedAt: '10 mins ago', assignedTeam: 'None' },
+  { id: 'REP-002', type: 'Water Logging', severity: 'Medium', location: 'Buxi Bazar Road Junction', reportedAt: '25 mins ago', assignedTeam: 'None' },
+  { id: 'REP-003', type: 'Pothole', severity: 'High', location: 'Broadway & College Square', reportedAt: '1 hour ago', assignedTeam: 'Alpha Squad' },
+  { id: 'REP-004', type: 'Tree on Road', severity: 'Low', location: 'Link Road Exit 4', reportedAt: '2 hours ago', assignedTeam: 'None' },
+  { id: 'REP-005', type: 'Bridge Crack', severity: 'High', location: 'Kathajodi Bridge Approach', reportedAt: '3 hours ago', assignedTeam: 'Rapid Response' },
+  { id: 'REP-006', type: 'Water Logging', severity: 'High', location: 'Badambadi Chowk Low Point', reportedAt: '4 hours ago', assignedTeam: 'None' },
+  { id: 'REP-007', type: 'Structural Damage', severity: 'Medium', location: 'Cuttack-Puri Highway Km 12', reportedAt: '5 hours ago', assignedTeam: 'Engineering B' },
+  { id: 'REP-008', type: 'Debris on Road', severity: 'Low', location: 'Mahanadi River Road', reportedAt: '6 hours ago', assignedTeam: 'None' },
+]
+
+// Convert CitizenReport to Operations Report format
+function convertToOperationReport(report: CitizenReport): Report {
+  const severityMap: Record<string, 'High' | 'Medium' | 'Low'> = {
+    high: 'High',
+    medium: 'Medium',
+    low: 'Low'
+  }
+  
+  // Format timestamp to relative time
+  const getRelativeTime = (timestamp: string) => {
+    const date = new Date(timestamp)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMins / 60)
+    const diffDays = Math.floor(diffHours / 24)
+    
+    if (diffMins < 60) return `${diffMins} mins ago`
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`
+    return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`
+  }
+  
+  // Build location from address parts
+  const location = `${report.landmark || report.address}, ${report.city}`
+  
+  return {
+    id: report.id,
+    type: report.type,
+    severity: severityMap[report.severity] || 'Medium',
+    location: location,
+    reportedAt: getRelativeTime(report.timestamp),
+    assignedTeam: 'None'
+  }
+}
+
 export default function OperationsPanel() {
-  const [reports, setReports] = useState(INITIAL_REPORTS)
+  const [reports, setReports] = useState<Report[]>(BASE_OPERATIONS_REPORTS)
+
+  useEffect(() => {
+    // Load reports from localStorage on mount
+    const stored = getStoredReports()
+    const converted = stored.map(convertToOperationReport)
+    // Combine base dummy data with stored reports
+    setReports([ ...converted,...BASE_OPERATIONS_REPORTS])
+  }, [])
+
+  // Listen for storage updates
+  useEffect(() => {
+    const handleStorageUpdate = (event: StorageEvent | CustomEvent) => {
+      let updatedReports: CitizenReport[]
+      
+      if ('detail' in event) {
+        updatedReports = event.detail as CitizenReport[]
+      } else {
+        if (event.key !== 'cuttack_issues') return
+        updatedReports = event.newValue ? JSON.parse(event.newValue) : []
+      }
+      
+      const converted = updatedReports.map(convertToOperationReport)
+      setReports([ ...converted,...BASE_OPERATIONS_REPORTS])
+    }
+
+    window.addEventListener('storage-update', handleStorageUpdate as EventListener)
+    window.addEventListener('storage', handleStorageUpdate as EventListener)
+
+    return () => {
+      window.removeEventListener('storage-update', handleStorageUpdate as EventListener)
+      window.removeEventListener('storage', handleStorageUpdate as EventListener)
+    }
+  }, [])
 
   const handleAssign = (id: string, team: string) => {
     setReports(reports.map(r => r.id === id ? { ...r, assignedTeam: team } : r))

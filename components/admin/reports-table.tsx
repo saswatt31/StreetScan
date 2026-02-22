@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ChevronDown, Clock, AlertCircle, CheckCircle2, Car, Plane, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { getStoredReports, type CitizenReport } from '@/lib/issues'
 
-type ReportSource = 'citizen' | 'drone' | 'government_vehicle'
+type ReportSource = 'citizen' | 'drone' | 'government_vehicle' | 'cctv'
 
 interface Report {
   id: string
@@ -18,7 +19,8 @@ interface Report {
   reportedBy?: string
 }
 
-const MOCK_REPORTS: Report[] = [
+// Base dummy data for reports table
+const BASE_REPORTS: Report[] = [
   {
     id: 'RPT-001',
     location: 'Badambadi Chowk, Cuttack',
@@ -44,7 +46,7 @@ const MOCK_REPORTS: Report[] = [
   {
     id: 'RPT-003',
     location: 'Mahanadi Bridge, NH-16',
-    type: 'Structural Damage',
+    type: 'Bridge Crack',
     severity: 'high',
     status: 'in_progress',
     timestamp: '6 hours ago',
@@ -55,13 +57,13 @@ const MOCK_REPORTS: Report[] = [
   {
     id: 'RPT-004',
     location: 'College Square, Cuttack',
-    type: 'Water Damage',
+    type: 'Water Logging',
     severity: 'medium',
     status: 'pending',
     timestamp: '3 hours ago',
     description: 'Waterlogging and road erosion near College Square roundabout.',
-    source: 'citizen',
-    reportedBy: 'Sunita Mohanty',
+    source: 'cctv',
+    reportedBy: 'CCTV Camera #C-07',
   },
   {
     id: 'RPT-005',
@@ -77,7 +79,7 @@ const MOCK_REPORTS: Report[] = [
   {
     id: 'RPT-006',
     location: 'Kathajodi Bridge, Cuttack',
-    type: 'Surface Crack',
+    type: 'Bridge Crack',
     severity: 'high',
     status: 'pending',
     timestamp: '5 hours ago',
@@ -88,7 +90,7 @@ const MOCK_REPORTS: Report[] = [
   {
     id: 'RPT-007',
     location: 'Jagatpur Road, Industrial Area',
-    type: 'Pothole',
+    type: 'Water Logging',
     severity: 'medium',
     status: 'in_progress',
     timestamp: '8 hours ago',
@@ -96,7 +98,62 @@ const MOCK_REPORTS: Report[] = [
     source: 'citizen',
     reportedBy: 'Ajay Kumar Das',
   },
+  {
+    id: 'RPT-008',
+    location: 'Mahanadi River Road, Cuttack',
+    type: 'Debris on Road',
+    severity: 'low',
+    status: 'pending',
+    timestamp: '12 hours ago',
+    description: 'Construction debris blocking one lane of the road near river approach.',
+    source: 'cctv',
+    reportedBy: 'CCTV Camera #C-03',
+  },
+  {
+    id: 'RPT-009',
+    location: 'Cuttack-Puri Highway Km 18',
+    type: 'Structural Damage',
+    severity: 'high',
+    status: 'in_progress',
+    timestamp: '10 hours ago',
+    description: 'Guardrail damage and road surface deterioration detected on highway stretch.',
+    source: 'government_vehicle',
+    reportedBy: 'Patrol Vehicle #GV-03',
+  },
+  {
+    id: 'RPT-010',
+    location: 'Sri Sri University Road, Cuttack',
+    type: 'Pothole',
+    severity: 'medium',
+    status: 'pending',
+    timestamp: '7 hours ago',
+    description: 'Multiple potholes near university entrance causing traffic slowdown.',
+    source: 'citizen',
+    reportedBy: 'Priyanka Mohapatra',
+  },
 ]
+
+// Convert CitizenReport to ReportsTable format
+function convertToTableReport(report: CitizenReport): Report {
+  const location = `${report.landmark || report.address}, ${report.city}`
+  
+  return {
+    id: report.id,
+    location: location,
+    type: report.type,
+    severity: report.severity,
+    status: report.status,
+    timestamp: new Date(report.timestamp).toLocaleString('en-IN', { 
+      month: 'short', 
+      day: 'numeric', 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    }),
+    description: report.description || 'No description provided',
+    source: report.source,
+    reportedBy: report.isAnonymous ? 'Anonymous Citizen' : (report.contactName || 'Unknown')
+  }
+}
 
 const sourceConfig: Record<ReportSource, { label: string; Icon: React.ElementType; color: string; bg: string }> = {
   citizen: {
@@ -116,6 +173,17 @@ const sourceConfig: Record<ReportSource, { label: string; Icon: React.ElementTyp
     Icon: Car,
     color: 'text-orange-600',
     bg: 'bg-orange-500/10 border-orange-500/20',
+  },
+  cctv: {
+    label: 'CCTV Camera',
+    Icon: ({ className, size }: { className?: string; size?: number }) => (
+      <svg className={className} width={size || 16} height={size || 16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+        <circle cx="12" cy="13" r="3"/>
+      </svg>
+    ),
+    color: 'text-emerald-600',
+    bg: 'bg-emerald-500/10 border-emerald-500/20',
   },
 }
 
@@ -143,8 +211,42 @@ export function ReportsTable({ onReportSelect }: ReportsTableProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState<'newest' | 'severity'>('newest')
   const [filterSource, setFilterSource] = useState<ReportSource | 'all'>('all')
+  const [reports, setReports] = useState<Report[]>(BASE_REPORTS)
 
-  const filtered = MOCK_REPORTS.filter(r => filterSource === 'all' || r.source === filterSource)
+  useEffect(() => {
+    // Load reports from localStorage on mount
+    const stored = getStoredReports()
+    const converted = stored.map(convertToTableReport)
+    // Combine base dummy data with stored reports
+    setReports([ ...converted,...BASE_REPORTS])
+  }, [])
+
+  // Listen for storage updates
+  useEffect(() => {
+    const handleStorageUpdate = (event: StorageEvent | CustomEvent) => {
+      let updatedReports: CitizenReport[]
+      
+      if ('detail' in event) {
+        updatedReports = event.detail as CitizenReport[]
+      } else {
+        if (event.key !== 'cuttack_issues') return
+        updatedReports = event.newValue ? JSON.parse(event.newValue) : []
+      }
+      
+      const converted = updatedReports.map(convertToTableReport)
+      setReports([...BASE_REPORTS, ...converted])
+    }
+
+    window.addEventListener('storage-update', handleStorageUpdate as EventListener)
+    window.addEventListener('storage', handleStorageUpdate as EventListener)
+
+    return () => {
+      window.removeEventListener('storage-update', handleStorageUpdate as EventListener)
+      window.removeEventListener('storage', handleStorageUpdate as EventListener)
+    }
+  }, [])
+
+  const filtered = reports.filter(r => filterSource === 'all' || r.source === filterSource)
   const sortedReports = [...filtered].sort((a, b) => {
     if (sortBy === 'severity') {
       const order = { high: 0, medium: 1, low: 2 }
@@ -161,7 +263,7 @@ export function ReportsTable({ onReportSelect }: ReportsTableProps) {
         <div className="flex flex-wrap gap-2">
           {/* Source filter */}
           <div className="flex gap-1 p-1 rounded-lg border border-border bg-muted/30">
-            {(['all', 'citizen', 'drone', 'government_vehicle'] as const).map((s) => (
+            {(['all', 'citizen', 'drone', 'government_vehicle', 'cctv'] as const).map((s) => (
               <button
                 key={s}
                 onClick={() => setFilterSource(s)}

@@ -20,8 +20,10 @@ export default function AdminDashboard() {
 
       <div className="flex">
         {/* Sidebar */}
-        <AdminSidebar onNavigate={(section) => setActiveSection(section as DashboardSection)} />
-
+<AdminSidebar
+  activeSection={activeSection}
+  onNavigate={(section) => setActiveSection(section)}
+/>
         {/* Main Content */}
         <main className="flex-1 lg:ml-0">
           <div className="border-l border-border lg:border-l-0">

@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import { ClipboardList, Map, BarChart3, Settings, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -10,46 +9,53 @@ import { cn } from '@/lib/utils'
 const navigationItems = [
   {
     label: 'Reports',
-    href: '#reports',
+    href: 'reports',
     icon: ClipboardList,
     description: 'View and manage reports',
+    color: 'text-blue-500 bg-blue-500/10 border-blue-500/30',
+    iconColor: 'text-blue-500',
   },
   {
     label: 'Map View',
-    href: '#map',
+    href: 'map',
     icon: Map,
     description: 'Interactive location map',
+    color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/30',
+    iconColor: 'text-emerald-500',
   },
   {
     label: 'Analytics',
-    href: '#analytics',
+    href: 'analytics',
     icon: BarChart3,
     description: 'Dashboard metrics',
+    color: 'text-amber-500 bg-amber-500/10 border-amber-500/30',
+    iconColor: 'text-amber-500',
   },
   {
     label: 'Operations',
-    href: '#operations',
+    href: 'operations',
     icon: Settings,
     description: 'System settings',
+    color: 'text-purple-500 bg-purple-500/10 border-purple-500/30',
+    iconColor: 'text-purple-500',
   },
 ]
 
 interface AdminSidebarProps {
+  activeSection?: string
   onNavigate?: (section: string) => void
 }
 
-export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
+export function AdminSidebar({ activeSection, onNavigate }: AdminSidebarProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const pathname = usePathname()
 
   const handleNavigate = (href: string) => {
-    const section = href.replace('#', '')
-    onNavigate?.(section)
+    onNavigate?.(href)
     setIsOpen(false)
   }
 
   return (
-    <div className='bg-background text-foreground'>
+    <div className="bg-background text-foreground">
       {/* Mobile Toggle */}
       <Button
         variant="ghost"
@@ -64,61 +70,90 @@ export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-40 w-64 border-r border-border bg-card transition-transform duration-200 lg:sticky lg:translate-x-0 lg:top-[73px] lg:h-[calc(100vh-73px)]',
+          'fixed inset-y-0 left-0 z-40 w-64 border-r border-border bg-card transition-transform duration-200',
+          'lg:sticky lg:translate-x-0 lg:top-[73px] lg:h-[calc(100vh-73px)]',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        <nav className="h-full overflow-y-auto p-4 space-y-2">
-          <div className="px-2 py-4 lg:py-0">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+        <nav className="h-full overflow-y-auto p-4 space-y-1.5">
+          <div className="px-2 py-4 lg:py-0 lg:pb-4">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Navigation
             </p>
           </div>
 
           {navigationItems.map((item) => {
             const Icon = item.icon
-            const isActive = pathname.includes(item.label.toLowerCase())
+            const isActive = activeSection === item.href
 
             return (
               <button
                 key={item.href}
                 onClick={() => handleNavigate(item.href)}
                 className={cn(
-                  'w-full flex items-start gap-3 px-3 py-3 rounded-lg transition-colors duration-200 text-left group',
+                  'w-full flex items-start gap-3 px-3 py-3 rounded-lg transition-all duration-200 text-left group border',
                   isActive
-                    ? 'bg-muted text-foreground'
-                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                    ? cn('border', item.color)
+                    : 'border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground'
                 )}
               >
-                <Icon className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                {/* Icon wrapper — coloured when active */}
+                <div
+                  className={cn(
+                    'flex-shrink-0 mt-0.5 p-1 rounded-md transition-colors duration-200',
+                    isActive
+                      ? item.color
+                      : 'text-muted-foreground group-hover:text-foreground'
+                  )}
+                >
+                  <Icon className="w-4 h-4" />
+                </div>
+
                 <div className="min-w-0">
-                  <p className="font-medium text-sm">{item.label}</p>
-                  <p className="text-xs text-muted-foreground group-hover:text-muted-foreground/80">
+                  <p
+                    className={cn(
+                      'font-medium text-sm transition-colors duration-200',
+                      isActive ? item.iconColor : ''
+                    )}
+                  >
+                    {item.label}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     {item.description}
                   </p>
                 </div>
+
+                {/* Active indicator dot */}
+                {isActive && (
+                  <div
+                    className={cn(
+                      'ml-auto self-center w-1.5 h-1.5 rounded-full flex-shrink-0',
+                      item.iconColor.replace('text-', 'bg-')
+                    )}
+                  />
+                )}
               </button>
             )
           })}
 
-          {/* Footer Section */}
+          {/* Quick Links */}
           <div className="border-t border-border mt-8 pt-8">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-2">
               Quick Links
             </p>
-            <ul className="space-y-2 text-sm">
+            <ul className="space-y-1 text-sm">
               <li>
                 <a
                   href="#"
-                  className="text-muted-foreground hover:text-foreground transition-colors block px-3 py-2 rounded hover:bg-muted/50"
+                  className="text-muted-foreground hover:text-foreground transition-colors block px-3 py-2 rounded-lg hover:bg-muted/50"
                 >
-                  Help & Support
+                  Help &amp; Support
                 </a>
               </li>
               <li>
                 <Link
                   href="/"
-                  className="text-muted-foreground hover:text-foreground transition-colors block px-3 py-2 rounded hover:bg-muted/50"
+                  className="text-muted-foreground hover:text-foreground transition-colors block px-3 py-2 rounded-lg hover:bg-muted/50"
                 >
                   Back to Home
                 </Link>

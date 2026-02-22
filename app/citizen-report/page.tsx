@@ -10,6 +10,7 @@ import {
   type DetectionResult,
 } from '@/components/citizen-report/detection-preview'
 import { LocationForm, type LocationData } from '@/components/citizen-report/location-form'
+import { locationDataToReport, saveReport } from '@/lib/issues'
 
 type SubmissionStep = 'idle' | 'submitted' | 'error'
 
@@ -64,12 +65,18 @@ export default function CitizenReportPage() {
 
   const handleFormSubmit = async (formData: LocationData) => {
     try {
+      // Convert form data to report format
+      const potholeCount = detectionResult?.pothole_count ?? 0
+      const report = locationDataToReport(formData, potholeCount)
+      
+      // Save to localStorage (this also dispatches the storage-update event)
+      saveReport(report)
+      
       setSubmissionState('submitted')
-      // Simulate API call (in production, send formData + selectedFile + detectionResult)
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      console.log('Report submitted:', formData, {
+      
+      console.log('Report submitted:', report, {
         hasImage: !!selectedFile,
-        detectionCount: detectionResult?.detections?.length ?? 0,
+        detectionCount: potholeCount,
       })
     } catch (error) {
       setSubmissionState('error')
