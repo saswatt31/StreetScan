@@ -99,9 +99,9 @@ export default function CitizenReportPage() {
 
       {submissionState === 'submitted' && (
         <div className="mx-auto max-w-4xl px-6 sm:px-8 py-16">
-          <div className="rounded-lg border border-border bg-card p-12 text-center space-y-6">
+          <div className="rounded-lg border border-border bg-background p-12 text-center space-y-6">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted">
-              <CheckCircle2 className="w-8 h-8 text-foreground" />
+              <CheckCircle2 className="w-8 h-8 text-background" />
             </div>
             <div className="space-y-2">
               <h2 className="text-2xl font-heading font-bold text-foreground">
@@ -112,10 +112,17 @@ export default function CitizenReportPage() {
               </p>
             </div>
             <div className="pt-6">
-              <Link href="/">
-                <Button>Return to Home</Button>
-              </Link>
+              {/* Added transition, hover scale, and shadow */}
+              <div className='max-w-fit rounded-md mx-auto border border-border transition-all duration-300 hover:scale-105 hover:shadow-lg hover:border-primary/50 p-4 text-center'>
+                <Link href="/">
+                  {/* Added w-full to make the button fill the container */}
+                  <Button className="w-full transition-colors active:scale-95">
+                    Return to Home
+                  </Button>
+                </Link>
+              </div>
             </div>
+
           </div>
         </div>
       )}
@@ -138,24 +145,24 @@ export default function CitizenReportPage() {
                 selectedImage={selectedImage}
               />
 
-              {selectedImage && (
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-heading font-bold text-foreground">
-                      Step 2: Pothole Detection
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      YOLO-based detection has analyzed your image. Results are below.
-                    </p>
-                  </div>
-                  <DetectionPreview
-                    imageUrl={selectedImage}
-                    detectionResult={detectionResult}
-                    isLoading={detectionLoading}
-                    error={detectionError}
-                  />
-                </div>
-              )}
+          <div className="space-y-4">
+  <div className="space-y-2">
+    <h3 className="text-lg font-heading font-bold text-foreground">
+      Step 2: Pothole Detection
+    </h3>
+    <p className="text-sm text-muted-foreground">
+      {selectedImage
+        ? 'YOLO-based detection has analyzed your image. Results are below.'
+        : 'Upload a photo above to run AI pothole detection.'}
+    </p>
+  </div>
+  <DetectionPreview
+    imageUrl={selectedImage}
+    detectionResult={detectionResult}
+    isLoading={detectionLoading}
+    error={detectionError}
+  />
+</div>
             </div>
 
             <div className="space-y-6">

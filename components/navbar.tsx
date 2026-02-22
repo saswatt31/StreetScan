@@ -1,9 +1,9 @@
 "use client"
-
 import { useState, useRef } from "react"
 import { motion } from "framer-motion"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { ThemeToggle } from "@/components/theme/ThemeToggle"
 
 const navItems = [
   { label: "Features", href: "#features" },
@@ -26,14 +26,14 @@ export function Navbar() {
     >
       <nav
         ref={navRef}
-        className="relative flex items-center justify-between px-4 py-3 rounded-full bg-zinc-900/40 backdrop-blur-md border border-zinc-800"
+        className="relative flex items-center justify-between px-4 py-3 rounded-full bg-card/40 backdrop-blur-md border border-border"
       >
         {/* Logo */}
         <a href="#" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
-            <span className="text-zinc-950 font-bold text-sm">SS</span>
+            <span className="text-foreground font-bold text-sm">SS</span>
           </div>
-          <span className="font-semibold text-white hidden sm:block">StreetScan</span>
+          <span className="font-semibold text-foreground hidden sm:block">StreetScan</span>
         </a>
 
         {/* Desktop Nav Items */}
@@ -42,14 +42,14 @@ export function Navbar() {
             <a
               key={item.label}
               href={item.href}
-              className="relative px-4 py-2 text-sm text-zinc-400 hover:text-white transition-colors"
+              className="relative px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-colors"
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
             >
               {hoveredIndex === index && (
                 <motion.div
                   layoutId="navbar-hover"
-                  className="absolute inset-0 bg-zinc-800 rounded-full"
+                  className="absolute inset-0 bg-muted rounded-full"
                   initial={false}
                   transition={{ type: "spring", stiffness: 500, damping: 30 }}
                 />
@@ -61,12 +61,13 @@ export function Navbar() {
 
         {/* CTA Buttons */}
         <div className="hidden md:flex items-center gap-3">
-          <Button variant="ghost" size="sm" className="text-zinc-400 hover:text-white hover:bg-zinc-800">
+          <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-muted">
             Sign In
           </Button>
-          <Button size="sm" className="shimmer-btn bg-white text-zinc-950 hover:bg-zinc-200 rounded-full px-4">
+          <Button size="sm" className="shimmer-btn bg-card text-foreground hover:bg-[color:var(--muted)] rounded-full px-4">
             Get Started
           </Button>
+          <ThemeToggle />
         </div>
 
         {/* Mobile Menu Button */}

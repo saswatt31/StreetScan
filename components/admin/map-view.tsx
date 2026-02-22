@@ -13,12 +13,16 @@ interface Issue {
 }
 
 const CUTTACK_ISSUES: Issue[] = [
-  { id: 'CTC-001', lat: 20.4631, lng: 85.8792, severity: 'high', type: 'Pothole', address: 'Badambadi Bus Stand Main Road' },
-  { id: 'CTC-002', lat: 20.4812, lng: 85.9145, severity: 'medium', type: 'Bridge Crack', address: 'Mahanadi Bridge (Near Jagatpur)' },
-  { id: 'CTC-003', lat: 20.4550, lng: 85.8850, severity: 'high', type: 'Water Logging', address: 'Link Road Junction' },
-  { id: 'CTC-004', lat: 20.4725, lng: 85.8660, severity: 'low', type: 'Tree on Road', address: 'SCB Medical College Internal Road' },
-  { id: 'CTC-005', lat: 20.4650, lng: 85.8890, severity: 'medium', type: 'Pothole', address: 'Dolamundai Square' },
-]
+  { id: 'CTC-006', lat: 20.4285, lng: 85.8340, severity: 'high', type: 'Pothole', address: 'Trisulia Bridge Entry Point' },
+  { id: 'CTC-007', lat: 20.4150, lng: 85.8210, severity: 'medium', type: 'Street Light Out', address: 'Sri Sri University Main Gate Road' },
+  { id: 'CTC-008', lat: 20.4020, lng: 85.8550, severity: 'high', type: 'Water Logging', address: 'Metro Satellite City Entrance' },
+  { id: 'CTC-009', lat: 20.4410, lng: 85.8620, severity: 'low', type: 'Garbage Dump', address: 'Netaji Subhash Chandra Bose Setu' },
+  { id: 'CTC-010', lat: 20.4855, lng: 85.9230, severity: 'high', type: 'Road Crack', address: 'Jagatpur Industrial Estate Lane 2' },
+  { id: 'CTC-011', lat: 20.4610, lng: 85.8720, severity: 'medium', type: 'Broken Divider', address: 'Ranihat Canal Road' },
+  { id: 'CTC-012', lat: 20.4520, lng: 85.8980, severity: 'low', type: 'Stray Animal Zone', address: 'Khannagar Park Road' },
+  { id: 'CTC-013', lat: 20.4780, lng: 85.8450, severity: 'high', type: 'Pothole', address: 'Bidanasi Housing Board Road' },
+  { id: 'CTC-014', lat: 20.4680, lng: 85.8820, severity: 'medium', type: 'Manhole Open', address: 'Chandi Chowk Junction' },
+  { id: 'CTC-015', lat: 20.4350, lng: 85.8280, severity: 'high', type: 'Dust Pollution', address: 'Naraj Road near Godi Sahi' }]
 
 export function MapView() {
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null)
@@ -99,22 +103,22 @@ export function MapView() {
   }, [isMounted])
 
   return (
-    <div className="w-full space-y-4 bg-slate-950 p-4 rounded-2xl">
+    <div className="w-full space-y-4 bg-card p-4 rounded-2xl border border-border">
       <div className="flex justify-between items-center px-2">
-        <h2 className="text-white font-bold text-lg flex items-center gap-2">
-          <MapPin className="text-indigo-400" size={20} />
+        <h2 className="text-foreground font-bold text-lg flex items-center gap-2">
+          <MapPin className="text-indigo-500 dark:text-indigo-400" size={20} />
           Cuttack Live Incident Map
         </h2>
-        <span className="text-xs text-slate-500 bg-slate-900 px-3 py-1 rounded-full border border-slate-800">
+        <span className="text-xs text-muted-foreground bg-muted px-3 py-1 rounded-full border border-border">
           Showing {CUTTACK_ISSUES.length} reports
         </span>
       </div>
 
-      <div className="h-[550px] w-full rounded-xl overflow-hidden border border-slate-800 shadow-2xl">
+      <div className="h-[550px] w-full rounded-xl overflow-hidden border border-border shadow-2xl">
         {/* Placeholder shown during SSR */}
         {!isMounted ? (
-          <div className="h-full w-full bg-slate-900 flex items-center justify-center">
-            <p className="text-slate-500 text-sm">Loading map...</p>
+          <div className="h-full w-full bg-muted flex items-center justify-center">
+            <p className="text-muted-foreground text-sm">Loading map...</p>
           </div>
         ) : (
           <div ref={mapContainerRef} style={{ height: '100%', width: '100%' }} />
@@ -122,22 +126,22 @@ export function MapView() {
       </div>
 
       {selectedIssue && (
-        <div className="bg-slate-900 p-5 rounded-xl border-l-4 border-l-indigo-500 border border-slate-800 animate-in fade-in slide-in-from-right-4">
+        <div className="bg-card p-5 rounded-xl border-l-4 border-l-indigo-500 border border-border animate-in fade-in slide-in-from-right-4">
           <div className="flex justify-between items-start">
             <div className="flex gap-4">
-              <div className="p-3 bg-slate-800 rounded-lg">
+              <div className="p-3 bg-muted rounded-lg">
                 <AlertTriangle className={selectedIssue.severity === 'high' ? 'text-rose-500' : 'text-amber-500'} />
               </div>
               <div>
-                <h4 className="text-white font-bold text-xl">{selectedIssue.type}</h4>
-                <p className="text-slate-400 flex items-center gap-1 text-sm mt-1">
+                <h4 className="text-foreground font-bold text-xl">{selectedIssue.type}</h4>
+                <p className="text-muted-foreground flex items-center gap-1 text-sm mt-1">
                   <MapPin size={14} /> {selectedIssue.address}, Cuttack
                 </p>
               </div>
             </div>
             <button
               onClick={() => setSelectedIssue(null)}
-              className="text-slate-500 hover:text-white text-xs bg-slate-800 px-2 py-1 rounded"
+              className="text-muted-foreground hover:text-foreground text-xs bg-muted px-2 py-1 rounded border border-border"
             >
               Dismiss
             </button>

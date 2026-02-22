@@ -49,7 +49,7 @@ export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
   }
 
   return (
-    <>
+    <div className='bg-background text-foreground'>
       {/* Mobile Toggle */}
       <Button
         variant="ghost"
@@ -136,6 +136,6 @@ export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
           aria-hidden="true"
         />
       )}
-    </>
+    </div>
   )
 }

@@ -41,10 +41,10 @@ export function Benefits() {
             return (
               <div
                 key={benefit.title}
-                className="group relative overflow-hidden rounded-2xl border border-white/10 bg-card/60 p-8 backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:bg-card/80 hover:shadow-lg hover:shadow-black/10 sf-fade-up"
+                className="group relative overflow-hidden rounded-2xl border border-white/10 dark:border-border bg-card/60 p-8 backdrop-blur-sm transition-all duration-300 hover:border-white/20 dark:hover:border-muted-foreground hover:bg-card/80 hover:shadow-lg hover:shadow-black/10 sf-fade-up"
                 style={{ animationDelay: `${idx * 0.1}s` }}
               >
-                <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-foreground transition-colors group-hover:bg-white/15">
+                <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 dark:bg-muted text-foreground transition-colors group-hover:bg-white/15 dark:hover:bg-muted/80">
                   <Icon className="h-6 w-6" strokeWidth={1.75} />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground">

@@ -3,6 +3,7 @@
 import { Bell, Settings, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { ThemeToggle } from '@/components/theme/ThemeToggle'
 
 export function AdminNavbar() {
   return (
@@ -32,7 +33,7 @@ export function AdminNavbar() {
             className="relative"
             aria-label="Notifications"
           >
-            <Bell className="w-5 h-5" />
+            <Bell className="w-5 h-5 text-foreground" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />
           </Button>
 
@@ -42,7 +43,7 @@ export function AdminNavbar() {
             size="icon"
             aria-label="Settings"
           >
-            <Settings className="w-5 h-5" />
+            <Settings className="w-5 h-5 text-foreground" />
           </Button>
 
           {/* Profile / Logout */}
@@ -57,9 +58,14 @@ export function AdminNavbar() {
                 size="icon"
                 aria-label="Logout"
               >
-                <LogOut className="w-5 h-5" />
+                <LogOut className="w-5 h-5 text-foreground" />
               </Button>
             </Link>
+          </div>
+
+          {/* Theme toggle */}
+          <div className="pl-3">
+            <ThemeToggle />
           </div>
 
           {/* Mobile Menu */}
