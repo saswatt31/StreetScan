@@ -1,10 +1,21 @@
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import "./globals.css";
+import type { Metadata } from "next";
+
+// This part changes the Tab Name and the Logo
+export const metadata: Metadata = {
+  title: "StreetScan",
+  description: "AI-powered infrastructure monitoring system for Cuttack",
+  icons: {
+    icon: "/logo.png", // This looks for logo.png in your 'public' folder
+  },
+};
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Your existing theme script stays here */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -25,7 +36,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className={` font-sans antialiased`}>
         <div className="noise-overlay" aria-hidden="true" />
         <ThemeProvider>{children}</ThemeProvider>
-        {/* <Analytics /> */}
       </body>
     </html>
   );
